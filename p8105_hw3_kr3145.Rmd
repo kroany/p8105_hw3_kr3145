@@ -1,0 +1,7 @@
+---
+title: "p8105_hw3_kr3145"
+author: "Kallan Roan"
+date: "2025-10-03"
+output: github_document
+---
+
