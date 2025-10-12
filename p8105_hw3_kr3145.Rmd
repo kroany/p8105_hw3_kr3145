@@ -48,6 +48,8 @@ Some key variables include `order_dow` and `order_hour_of_day`, representing the
 `r instacart |> pull(order_hour_of_day) |> mean() |> round()`:00. For the customers who have ordered from instacart previously, the average days since the last order is 
 `r instacart |> pull(days_since_prior_order) |> mean() |> round()` days.
 
+test
+
 How many aisles are there, and which aisles are the most items ordered from?
 
 ```{r}
