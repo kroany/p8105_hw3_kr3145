@@ -9,7 +9,6 @@ Load libraries
 
 ```{r}
 library(tidyverse)
-library(lubridate)
 library(patchwork)
 library(p8105.datasets)
 ```
@@ -18,8 +17,8 @@ Preset settings for ggplot
 
 ```{r}
 knitr::opts_chunk$set(
-  fig.width = 12,
-  fig.height = 12,
+  fig.width = 10,
+  fig.height = 10,
   fig.asp = .6,
   out.width = "90%"
 )
@@ -43,9 +42,9 @@ Load Instacart Data
 data("instacart")
 ```
 
-`instacart` dataset has `r nrow(instacart)` observations, each row representing a product from an order. There are `r instacart |> summarize(n_distinct(order_id))` unique orders in the dataset. There are `r ncol(instacart)` variables. `eval_set` represents the which evaluation set this orders belongs in, which this data specifically only includes data from the "`r instacart |> pull(eval_set) |> unique()`" eval_set. 
+`instacart` dataset has `r nrow(instacart)` observations, each row representing a product from an order. There are `r instacart |> summarize(n_distinct(order_id))` unique orders in the dataset. There are `r ncol(instacart)` variables. `eval_set` represents which evaluation set this orders belongs in, which this data specifically only includes data from the "`r instacart |> pull(eval_set) |> unique()`" eval_set. 
 
-Some key variables include `order_dow` and `order_hour_of_day`, representing the day of the week and hour of the day the order was placed respectively. `days_since_prior_order` order represents the number of days since the last order, capped at `r instacart |> pull(days_since_prior_order) |> max()` and NA if this is the customer's first order. `product_name`, `aisle_name`, and `department` represents the product, aisle, and department name respectively. `aisle_id`, `department_id`, `order_id`, `product_id`, and `user_id` represents the aisle, department, product, and user id respectively. `add_to_card_order` represents the order in which each product was added to cart. `reordered` indicates 1 if the product has been ordered in the past and 0 otherwise. The average order day is `r instacart |> pull(order_dow) |> mean() |> round()`, representing Thursday. The average order time is 
+Some key variables include `order_dow` and `order_hour_of_day`, representing the day of the week and hour of the day the order was placed respectively. `days_since_prior_order` represents the number of days since the last order, capped at `r instacart |> pull(days_since_prior_order) |> max()` and NA if this is the customer's first order. `product_name`, `aisle_name`, and `department` represents the product, aisle, and department name respectively. `aisle_id`, `department_id`, `order_id`, `product_id`, and `user_id` represents the aisle, department, order, product, and user id respectively. `add_to_card_order` represents the order in which each product was added to cart. `reordered` indicates 1 if the product has been ordered in the past and 0 otherwise. The average order day is `r instacart |> pull(order_dow) |> mean() |> round()`, representing Thursday. The average order time is 
 `r instacart |> pull(order_hour_of_day) |> mean() |> round()`:00. For the customers who have ordered from instacart previously, the average days since the last order is 
 `r instacart |> pull(days_since_prior_order) |> mean() |> round()` days.
 
@@ -71,7 +70,7 @@ Create plot
 
 ```{r}
 num_aisle_insta |> 
-  filter(n > 10000) |> #keep those with 10000 orders
+  filter(n > 10000) |> #keep those with more than 10000 orders
   mutate(aisle = fct_reorder(aisle, n)) |> 
   ggplot(aes(x = aisle, y = n)) + 
   geom_col() +
@@ -81,8 +80,9 @@ num_aisle_insta |>
     title = "Number of Items Ordered in Each Aisle \nfor >10,000 items ordered", 
   ) +
   coord_flip()
- # theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 ```
+
+The plot shows that among aisles that have more than 10,000 items ordered, the fresh vegetables and fresh fruits aisles have the most items ordered. The items ordered in each of fresh vegetables and fresh fruits aisles has around two times the items ordered compared to the packaged vegetables fruits aisle, the aisle with the third most ordered items. Dry paste, oils vinegars, and butter aisle has the least number of items ordered. 
 
 ##### Make a table showing the three most popular items in each of the aisles “baking ingredients”, 
 “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is
@@ -100,8 +100,9 @@ instacart |>
   knitr::kable()
 ```
 
-##### Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are 
-ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
+Packaged vegetables fruits aisle has the most overall items ordered compared to bakign ingredeints and dog food care aisle. Organic baby spinach, organic raspberries, and organic blueberries are the top three items ordered in the packaged vegetables fruits aisle. Little brown sugar, pure baking soda, and cane sugar are top three items ordered in the baking ingredients aisle. Snack sticks chicken & rice recipe dog treats, organix chicken & brown rice recipe, and small dog biscuits are the top three items ordered in dog food care aisle.  
+
+##### Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
 
 ```{r}
 instacart |> 
@@ -125,6 +126,8 @@ instacart |>
   ) |> 
   knitr::kable()
 ```
+
+On average, coffee ice cream is purchased at a later time of the day compared to compared to pink lady apples. One exception is on Friday, where pink lady apples is purchased at a slightly earlier time compared to coffee ice cream. Both coffee ice cream and pink lady apples are purchased in late morning/afternoon part of the day. 
 
 # Problem 2
 
@@ -196,7 +199,6 @@ combined_zip_zori_df |>
 Calculate number of zip codes observed fewer than 10 times
 
 ```{r}
-#output only those observed less than 10 times
 combined_zip_zori_df |> 
   drop_na(price) |> 
   group_by(zip_code) |> 
@@ -210,9 +212,7 @@ combined_zip_zori_df |>
 
 There are 26 zip codes that are observed less than 10 times.
 
-???
-Some zip codes are observed rarely because there were no rentals in that area previously, and there have been  been more rentals available in that area in recent areas. At the same time, it may be possible that there were rentals in that area previously, but there were less to no rentals in recent years. Some rentals may be more available in certain times of the year, so there will be more or less data during those time periods. 
-Some zip codes are observed every month because there are enough rentals readily available that a ZORI score is accurately calculated for each month. This is the case especially for boroughs and neighborhoods with a larger population, like Manhattan.
+Some zip codes are rarely observed because there were no rentals in that area previously, and there have been been more rentals available in that area in recent years At the same time, it may be possible that there were rentals in that area previously, but there were less to no rentals in recent years. Some rentals may be more available in certain times of the year, so there will be more or less data during those time periods. Some zip codes are observed every month because there are enough rentals readily available that a ZORI score is accurately calculated for each month. This is the case especially for boroughs and neighborhoods with a larger population, like Manhattan.
 
 ##### Create a reader-friendly table showing the average rental price in each borough and year (not month). Comment on trends in this table.
 
@@ -227,7 +227,7 @@ combined_zip_zori_df |>
     names_from = year,
     values_from = mean
   ) |> 
-  knitr::kable()
+  knitr::kable(digits = 2)
 ```
 
 On average, the average yearly rental price has increased overtime for each borough. The average yearly rental price for Manhattan has increased the most, with the average yearly rental increased by over $1,000 from 2015 to 2024. Except for Staten Island, there is data for average yearly rental for all years between 2015 to 2024. Staten Island has no data on rental price from 2015 to 2019. 
@@ -255,7 +255,7 @@ combined_zip_zori_df |>
 ggp_zip_price_all
 ```
 
-On average, NYC rental prices has increased over the years. The plot shows that the change in price increases significantly starting 2021. The order in average rental prices across boroughs has stayed consistent throughout the years, with Bronx having the lowest average rental prices, followed by Staten Island, Queens, Brooklyn, and finally  Manhattan having the highest average rental prices in NYC. The plot also shows that there is only data for rental prices in Staten Island starting 2020. 
+On average, NYC rental prices has increased over the years. The plot shows that the change in price increases significantly starting 2021. The order in average rental prices across boroughs has stayed consistent throughout the years, with Bronx having the lowest average rental prices, followed by Staten Island, Queens, Brooklyn, and finally Manhattan having the highest average rental prices in NYC. The plot also shows that there is only data for rental prices in Staten Island starting 2020. 
 
 ##### Compute the average rental price within each ZIP code over each month in 2023. Make a reader-friendly plot showing the distribution of ZIP-code-level rental prices across boroughs; put differently, your plot should facilitate the comparison of the distribution of average rental prices across boroughs. Comment on this plot.
 
@@ -265,9 +265,12 @@ Create plot to show the distribution of ZIP-code-level rental prices across boro
 ggp_zip_price_2023 = 
 combined_zip_zori_df |> 
   filter(year(year) == 2023) |> 
-  #group_by(borough, zip_code, month) |> 
-  mutate(borough = forcats::fct_reorder(borough, price)) |> 
-  ggplot(aes(x = borough, y = price)) +
+  drop_na(price) |> 
+  group_by(borough, zip_code, month) |> 
+  summarize(
+    mean_price = mean(price)
+  ) |> 
+  ggplot(aes(x = fct_reorder(borough, mean_price), y = mean_price)) +
   geom_boxplot() +
   labs(
     x = "Borough",
@@ -279,7 +282,7 @@ combined_zip_zori_df |>
 ggp_zip_price_2023
 ```
 
-The boxplot shows that the order of boroughs from lowest to highest average rental prices remained the same, even when only looking at data from 2023. Staten island has the lowest range of rental prices, while Manhattan has the largest range of rental prices, having a rental prices as low as over \$2,000 to as high as over \$8,000. 
+The boxplot shows that the order of boroughs from lowest to highest average rental prices remained the same, even when only looking at data from 2023. Staten island has the lowest range of rental prices, while Manhattan has the largest range of rental prices, having rental prices as low as over \$2,000 to as high as over \$8,000. Manhattan has the largest interquartile range, while Staten Island has the smallest interquartile range. Queens and Manhattan also have outliers present in the higher range of mean rental prices.
 
 ##### Combine the two previous plots into a single graphic, and export this to a results folder in your repository.
 
@@ -287,7 +290,11 @@ The boxplot shows that the order of boroughs from lowest to highest average rent
 combine_ggp_zip =
   ggp_zip_price_all / ggp_zip_price_2023 
 
-ggsave("results/combine_ggp_zip.png", combine_ggp_zip, bg = "white")
+ggsave("results/combine_ggp_zip.png", 
+       combine_ggp_zip, 
+       bg = "white",
+       width = 6,
+       height = 7)
 ```
 
 The combined plot is located in a folder titled "results."
@@ -302,7 +309,7 @@ nhanes_covar_df =
            skip = 4) |> 
   janitor::clean_names() |> 
   drop_na() |> # drop those with missing demographic data 
-  filter(age >= 21) # keep participants >= 21 years old; exclude participants less than 21 years of age
+  filter(age >= 21) # keep participants >= 21 years old
 ```
 
 Load and clean nhanes_accel.csv
@@ -364,7 +371,7 @@ There are more individuals who are in the more than high school education catego
 nhanes_covar_accel_df |>
   distinct(seqn, sex, education, age) |>  
   ggplot(aes(x = age)) +
-  geom_histogram(binwidth = 5) +
+  geom_histogram(binwidth = 3) +
   facet_grid(sex ~ education) +
   labs(
     x = "Age (years)",
@@ -374,7 +381,7 @@ nhanes_covar_accel_df |>
   ) 
 ```
 
-The histogram shows that among males, there is a relatively even distribution of age for each education category. Among females, there is also a relatively even distribution of age for those in the less than high school and high school equivalent education categories. For females in the more than high school education category, the distribution appears slightly right skewed, with more females below 40's. 
+The histogram shows that among males, there is a relatively even distribution of age for each education category. Among females, there is also a relatively even distribution of age for those in the less than high school and high school equivalent education categories. For females in the more than high school education category, the age distribution appears slightly right skewed, with more females below 40's. 
 
 ##### Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each participant. Plot these total activities (y-axis) against age (x-axis); your plot should compare men to women and have separate panels for each education level. Include a trend line or a smooth to illustrate differences. Comment on your plot.
 
@@ -396,7 +403,7 @@ nhanes_covar_accel_df |>
   ) 
 ```
 
-Across all sexes and education categories, as age increases, the total activity in minutes decreases, on average. For those in the high school equivalent and more than high school education categories, females have higher total activity over the day compared to males. In the less than high school education category, females have higher total activity recorded compared to males in those 40 years old and younger. However, for those older than 40 years in the less than high school category, males recorded higher total activity compared females. 
+Across all sex and education categories, as age increases, the total activity in minutes decreases, on average. For those in the high school equivalent and more than high school education categories, females have higher total activity throughout the day compared to males. In the less than high school education category, females have higher total activity recorded compared to males in those 40 years old and younger. However, for those older than 40 years in the less than high school category, males recorded higher total activity compared females. 
 
 ##### Accelerometer data allows the inspection activity over the course of the day. Make a three-panel plot that shows the 24-hour activity time courses for each education level and use color to indicate sex. Describe in words any patterns or conclusions you can make based on this graph; including smooth trends may help identify differences.
 
@@ -418,4 +425,4 @@ nhanes_covar_accel_df |>
   ) 
 ```
 
-Across all sexes and education categories, the activity time in minutes is the lowest during the earliest and latest time of the 24-hour day, with more activity time during the day between 500 and 1000 minutes. There is a decrease in activity between 0 to 250 minutes, followed by a sharp increase in activity time until 500 minutes, and a sharp decrease after 1000 minutes across all sexes and education categories. On average, females have higher activity time throughout the day compared to males across all education categories. It also appears that as an individual has a higher education, there is a larger increase in gap of activity time between males and females. More specifically, while the difference in activity times between males and females does not appear as significant among those in the less than high school education category, those in more than high school education category have a larger difference in activity time between females and males. The plots also show that those with high school equivalent education have the lowest average activity time during the day compared to those with less than high school and more than high school education. 
+Across all sex and education categories, the activity time in minutes is the lowest during the earliest and latest time of the 24-hour day, with more activity time during the day between 500 and 1000 minutes. There is a decrease in activity between 0 to 250 minutes, followed by a sharp increase in activity time until 500 minutes, and a sharp decrease after 1000 minutes across all sexes and education categories. On average, females have higher activity time throughout the day compared to males across all education categories. It also appears that as an individual has a higher education, there is a larger increase in gap of activity time between males and females. More specifically, while the difference in activity times between males and females does not appear as significant among those in the less than high school education category, those in more than high school education category have a larger difference in activity time between females and males. The plots also show that those with high school equivalent education have the lowest peak in average activity time during the day compared to those with less than high school and more than high school education. 
